@@ -1,0 +1,131 @@
+[paths]
+raw = "data/raw"
+silver = "data/silver"
+gold = "data/gold"
+
+[download]
+timeout_s = 60.0
+retries = 4
+backoff_s = 2.0
+workers = 4
+user_agent = "warmpool/1.0 (+https://github.com/adwitiyashukla/warmpool)"
+
+[sources]
+roni = "https://www.cpc.ncep.noaa.gov/data/indices/RONI.ascii.txt"
+oni = "https://www.cpc.ncep.noaa.gov/data/indices/oni.ascii.txt"
+weekly = "https://www.cpc.ncep.noaa.gov/data/indices/wksst9120.for"
+nino34_long = "https://psl.noaa.gov/data/timeseries/month/data/nino34.long.anom.data"
+climdiv_base = "https://www.ncei.noaa.gov/pub/data/cirs/climdiv/"
+climdiv_elements = ["tmpc", "hddc", "cddc", "pcpn"]
+retail = "https://www.eia.gov/electricity/data/eia861m/xls/sales_revenue.xlsx"
+retail_history = "https://www.eia.gov/electricity/data/eia861m/archive/xls/HS861M%201990-2009.xlsx"
+wholesale_index = "https://www.eia.gov/electricity/wholesale/"
+wholesale_pattern = "ice_electric"
+henry_hub = "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DHHNGSP"
+
+[enso]
+threshold = 0.5
+min_months = 5
+strength_edges = [0.5, 1.0, 1.5, 2.0]
+base_window_years = 30
+base_step_years = 5
+base_anchor_year = 1956
+predictor_month = 8
+
+[climate]
+first_year = 1895
+anomaly_half_window = 15
+weight_years = [2015, 2024]
+dc_climate_state = "MD"
+
+[regions]
+ISONE = ["CT", "MA", "ME", "NH", "RI", "VT"]
+NYISO = ["NY"]
+PJM = ["DC", "DE", "MD", "NJ", "OH", "PA", "VA", "WV"]
+SOUTHEAST = ["AL", "GA", "KY", "NC", "SC", "TN"]
+FLORIDA = ["FL"]
+MISO_NORTH = ["IA", "MI", "MN", "ND", "SD", "WI"]
+MISO_CENTRAL = ["IL", "IN", "MO"]
+MISO_SOUTH = ["AR", "LA", "MS"]
+SPP = ["KS", "NE", "OK"]
+ERCOT = ["TX"]
+NORTHWEST = ["ID", "MT", "OR", "WA"]
+ROCKIES = ["CO", "UT", "WY"]
+SOUTHWEST = ["AZ", "NM", "NV"]
+CAISO = ["CA"]
+
+[prices]
+min_days = 8
+gas_min_days = 3
+min_winters = 10
+fall_months = [9, 10]
+winter_months = [12, 1, 2]
+hydro_hub = "MIDC"
+hydro_reference = "PALOVERDE"
+hydro_states = ["ID", "MT", "OR", "WA"]
+hydro_precip_months = [10, 11, 12, 1, 2, 3]
+hydro_max_lag = 9
+permutations = 4999
+seed = 19
+
+[prices.hub_regions]
+MIDC = "NORTHWEST"
+PALOVERDE = "SOUTHWEST"
+SP15 = "CAISO"
+NP15 = "CAISO"
+MASSHUB = "ISONE"
+PJMWEST = "PJM"
+INDIANA = "MISO_CENTRAL"
+ERCOTNORTH = "ERCOT"
+
+[teleconnect]
+variables = ["tmp", "hdd", "cdd", "pcpn"]
+max_lead = 6
+surrogates = 999
+fdr_method = "bh"
+fdr_q = 0.10
+bootstrap = 1000
+seed = 7
+
+[cluster]
+variables = ["tmp", "pcpn"]
+k_min = 2
+k_max = 8
+bootstrap = 200
+seed = 11
+
+[analog]
+start_month = 1
+band = 2
+top_k = 8
+family_k_max = 6
+
+[rules]
+min_support = 0.02
+max_len = 4
+min_confidence = 0.5
+min_lift = 1.5
+precip_regions = ["NORTHWEST", "CAISO", "SOUTHEAST", "FLORIDA"]
+permutations = 999
+fdr_q = 0.10
+seed = 13
+
+[forecast]
+methods = ["climatology", "enso", "analog", "linear", "gated"]
+bandwidth = 0.4
+min_ess = 10.0
+gate = 1.0
+first_climate_winter = 1950
+first_sales_winter = 1995
+sector = "residential"
+train_years = 15
+data_through_month = 7
+billing_weights = [0.0, 0.25, 0.5, 0.75]
+hac_lags = 12
+interval = 0.8
+bootstrap = 2000
+seed = 17
+
+[outlook]
+winter = 2026
+scenarios = [1.0, 1.5, 2.0, 2.5, 3.0]
