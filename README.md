@@ -104,12 +104,13 @@ backtest         five forecast methods scored with CRPS since 1950
 prices           winter premiums and the Mid-C hydro spread
 outlook          the 2026-27 forecast and the winter index scenarios
 replica          synthetic copies of every raw file with planted effects
-app              Streamlit dashboard, the same app that runs on the Space
+views            the dashboard's charts and tables, shared by both front ends
+app, space       Streamlit dashboard and its static export for the Space
 ```
 
 On the real run 19 of the 20 quality checks pass and one warning stays visible, 5 wholesale rows in EIA's files whose delivery ends before it starts. Every tunable lives in config.toml and is checked when it loads. The tests run on a synthetic replica of every raw file, written in the real formats with known effects planted inside, and the pipeline has to find them again. On the full size replica it recovers the planted billing lag in 48 of 49 units and the planted climate regions with an adjusted Rand index of 1.0.
 
-The same raw files were run on Linux in the cloud and on a Windows laptop. All 44 tables match, 25 of them exactly and the rest within 1.4e-10. CI runs ruff and the 123 tests on Linux, macOS and Windows with Python 3.11 to 3.13, and a second scheduled workflow pings the Space every six hours so the demo does not go to sleep.
+The same raw files were run on Linux in the cloud and on a Windows laptop. All 44 tables match, 25 of them exactly and the rest within 1.4e-10. CI runs ruff and the 123 tests on Linux, macOS and Windows with Python 3.11 to 3.13. The live dashboard is a static export of the Streamlit app, with every chart and table built in Python ahead of time, so it loads fast and never goes to sleep.
 
 ## run it
 
@@ -129,7 +130,7 @@ On Linux or Mac use .venv/bin/ in place of .venv\Scripts\ and app/app.py for the
 .venv\Scripts\python -m pytest
 ```
 
-The 123 tests need no network. `warmpool space` writes the Hugging Face Space bundle to build/space.
+The 123 tests need no network. `warmpool space` writes the static dashboard for the Space to build/space.
 
 ## data sources
 

@@ -47,8 +47,8 @@ def _replica(cfg, args) -> None:
 def _space(cfg, args) -> None:
     from warmpool import space
 
-    out = space.build(cfg, cfg.root / args.out, cfg.root / "app" / "app.py")
-    print(f"Space bundle written to {out}")
+    out = space.build(cfg, cfg.root / args.out)
+    print(f"static site for the Space written to {out}")
 
 
 COMMANDS = {
@@ -74,7 +74,7 @@ def build_parser() -> argparse.ArgumentParser:
     rep = sub.add_parser("replica", help="write a synthetic copy of every raw file")
     rep.add_argument("--root", default="build/rehearsal")
     rep.add_argument("--seed", type=int, default=2026)
-    sp = sub.add_parser("space", help="bundle the dashboard for a Hugging Face Space")
+    sp = sub.add_parser("space", help="export the dashboard as a static Hugging Face Space")
     sp.add_argument("--out", default="build/space")
     return parser
 

@@ -1,13 +1,14 @@
 from __future__ import annotations
 
+import json
 import os
 
-import duckdb
 import pytest
+from plotly.offline.offline import get_plotlyjs_version
 from streamlit.testing.v1 import AppTest
 
 from tests.conftest import ROOT
-from warmpool import space
+from warmpool import space, views
 
 APP = str(ROOT / "app" / "app.py")
 
@@ -42,22 +43,25 @@ def test_every_outlook_method_renders(replica_gold, monkeypatch, method):
     assert not at.exception
 
 
-def test_space_bundle_runs_the_dashboard(replica_gold, tmp_path, monkeypatch):
+def test_space_is_a_static_page_with_every_view(replica_gold, tmp_path):
     cfg, _, _ = replica_gold
-    out = space.build(cfg, tmp_path / "space", ROOT / "app" / "app.py")
-    assert {p.name for p in out.iterdir()} >= {
-        "app.py",
-        "Dockerfile",
-        "requirements.txt",
-        "README.md",
-        "warmpool.duckdb",
-        ".streamlit",
-    }
-    with duckdb.connect(str(out / "warmpool.duckdb"), read_only=True) as con:
-        names = {n for (n,) in con.execute("show tables").fetchall()}
-    assert names == set(space.APP_TABLES)
-    at = _run(out / "warmpool.duckdb", monkeypatch)
-    assert not at.exception
+    out = space.build(cfg, tmp_path / "space")
+    assert {p.name for p in out.iterdir()} == {"index.html", "README.md"}
+    assert "sdk: static" in (out / "README.md").read_text(encoding="utf-8")
+    page = (out / "index.html").read_text(encoding="utf-8")
+    assert page.isascii()
+    assert f"plotly-{get_plotlyjs_version()}.min.js" in page
+    start = page.index('id="data">') + len('id="data">')
+    data = json.loads(page[start : page.index("</script>", start)])
+    assert data["tabs"] == views.TABS
+    assert len(data["outlook"]["views"]) == 2 * len(data["outlook"]["methods"])
+    assert len(data["tele"]["fingerprint"]) == len(views.VARIABLE_NAME) * len(views.SEASONS)
+    assert len(data["tele"]["grid"]) == len(views.VARIABLE_NAME) * len(data["tele"]["states"])
+    maps = data["backtest"]["maps"]
+    assert "sales|all|perfect_weather" in maps
+    assert "climate|all|perfect_weather" not in maps
+    figures = [*maps.values(), *data["tele"]["fingerprint"].values()]
+    assert all(fig["data"] and fig["layout"]["height"] for fig in figures)
 
 
 def test_missing_warehouse_shows_a_clear_error(tmp_path, monkeypatch):
